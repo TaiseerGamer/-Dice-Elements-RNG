@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Elements RNG</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="stats-bar">
+        <div>💰 Coins: <span id="coins">0</span></div>
+        <div style="font-size: 0.8rem; margin-top: 5px;">Luck Multiplier: x<span id="luck-stat">1</span></div>
+    </div>
+
+    <div class="game-container">
+        <!-- Main Rolling Area -->
+        <div class="roll-section">
+            <div id="dice">🎲</div>
+            <div class="rarity-display">
+                <p id="rarity-name">Click the Dice to Roll!</p>
+                <p id="rarity-chance"></p>
+            </div>
+            <div class="log" id="roll-log"></div>
+        </div>
+
+        <!-- Shop Area -->
+        <div class="upgrade-section">
+            <h3>Upgrades</h3>
+            <div class="upgrade-card">
+                <div>🍀 Better Clovers</div>
+                <small>Increase luck by 20%</small>
+                <button class="buy-btn" onclick="buyUpgrade('luck')" id="luck-cost">Cost: 50</button>
+            </div>
+            <div class="upgrade-card">
+                <div>💎 Greedier Dice</div>
+                <small>+2 coins per rarity tier</small>
+                <button class="buy-btn" onclick="buyUpgrade('coins')" id="coin-cost">Cost: 100</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
