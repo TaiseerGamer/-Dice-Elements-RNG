@@ -3,42 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Elements RNG</title>
+    <title>Dice Elements RNG - v0.0.1</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="stats-bar">
-        <div>💰 Coins: <span id="coins">0</span></div>
-        <div style="font-size: 0.8rem; margin-top: 5px;">Luck Multiplier: x<span id="luck-stat">1</span></div>
+    <div class="header-container">
+        <div class="stats-bar">
+            <div>💰 Coins: <span id="coins">0</span></div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Luck Multiplier: x<span id="luck-stat">1.0</span></div>
+        </div>
+        <div class="best-roll-box">
+            <div>🏆 Rarest Roll:</div>
+            <div id="best-roll-display" style="color: #aaa; font-weight: bold;">None Yet</div>
+        </div>
     </div>
 
     <div class="game-container">
-        <!-- Main Rolling Area -->
         <div class="roll-section">
             <div id="dice">🎲</div>
-            <div class="rarity-display">
+            
+            <div class="controls">
+                <button id="autoroll-btn" class="control-btn" onclick="toggleAutoRoll()">Auto-Roll: OFF</button>
+            </div>
+
+            <div class="rarity-display" id="rarity-display-box">
                 <p id="rarity-name">Click the Dice to Roll!</p>
                 <p id="rarity-chance"></p>
             </div>
             <div class="log" id="roll-log"></div>
         </div>
 
-        <!-- Shop Area -->
         <div class="upgrade-section">
-            <h3>Upgrades</h3>
+            <h3>Shop Upgrades <span style="font-size: 0.8rem; color: #4ecca3;">v0.0.1</span></h3>
             <div class="upgrade-card">
                 <div>🍀 Better Clovers</div>
-                <small>Increase luck by 20%</small>
+                <small>Increase luck by +20%</small>
                 <button class="buy-btn" onclick="buyUpgrade('luck')" id="luck-cost">Cost: 50</button>
             </div>
             <div class="upgrade-card">
                 <div>💎 Greedier Dice</div>
-                <small>+2 coins per rarity tier</small>
+                <small>+2 coins multiplier bonus</small>
                 <button class="buy-btn" onclick="buyUpgrade('coins')" id="coin-cost">Cost: 100</button>
             </div>
         </div>
     </div>
+
+    <div class="version-tag">v0.0.1 Patch - Added Auto-Roll & Rarity Glows</div>
 
     <script src="script.js"></script>
 </body>
