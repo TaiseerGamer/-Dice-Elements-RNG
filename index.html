@@ -3,53 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Elements RNG - v0.0.1</title>
+    <title>Dice Elements RNG - v0.0.2</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="header-container">
-        <div class="stats-bar">
-            <div>💰 Coins: <span id="coins">0</span></div>
-            <div style="font-size: 0.8rem; margin-top: 5px;">Luck Multiplier: x<span id="luck-stat">1.0</span></div>
+        <div class="stats-bar card">
+            <div class="stat-item">💰 <span id="coins">0</span></div>
+            <div class="stat-item luck-text">🍀 Luck: <span id="luck-stat">1.0</span></div>
         </div>
-        <div class="best-roll-box">
-            <div>🏆 Rarest Roll:</div>
-            <div id="best-roll-display" style="color: #aaa; font-weight: bold;">None Yet</div>
+        <div class="best-roll-box card">
+            <div class="label">🏆 BEST ROLL</div>
+            <div id="best-roll-display">None Yet</div>
         </div>
     </div>
 
     <div class="game-container">
-        <div class="roll-section">
-            <div id="dice">🎲</div>
+        <div class="roll-section card">
+            <div id="dice-container">
+                <div id="dice">🎲</div>
+                <div id="pity-indicator">PITY READY!</div>
+            </div>
             
+            <div class="pity-bar-container">
+                <div id="pity-fill"></div>
+                <span class="pity-label">LUCK METER (PITY)</span>
+            </div>
+
             <div class="controls">
                 <button id="autoroll-btn" class="control-btn" onclick="toggleAutoRoll()">Auto-Roll: OFF</button>
             </div>
 
-            <div class="rarity-display" id="rarity-display-box">
-                <p id="rarity-name">Click the Dice to Roll!</p>
+            <div class="rarity-display" id="display-box">
+                <p id="rarity-name">Roll the Dice!</p>
                 <p id="rarity-chance"></p>
             </div>
-            <div class="log" id="roll-log"></div>
+
+            <div class="recent-rolls" id="recent-feed"></div>
         </div>
 
-        <div class="upgrade-section">
-            <h3>Shop Upgrades <span style="font-size: 0.8rem; color: #4ecca3;">v0.0.1</span></h3>
-            <div class="upgrade-card">
-                <div>🍀 Better Clovers</div>
-                <small>Increase luck by +20%</small>
-                <button class="buy-btn" onclick="buyUpgrade('luck')" id="luck-cost">Cost: 50</button>
+        <div class="sidebar">
+            <div class="upgrade-section card">
+                <h3>Upgrades</h3>
+                <div class="upgrade-item">
+                    <span>🍀 Clover (Permanent)</span>
+                    <button onclick="buyUpgrade('luck')" id="luck-cost" class="buy-btn">Cost: 50</button>
+                </div>
+                <div class="upgrade-item">
+                    <span>💎 Greed (Permanent)</span>
+                    <button onclick="buyUpgrade('coins')" id="coin-cost" class="buy-btn">Cost: 100</button>
+                </div>
             </div>
-            <div class="upgrade-card">
-                <div>💎 Greedier Dice</div>
-                <small>+2 coins multiplier bonus</small>
-                <button class="buy-btn" onclick="buyUpgrade('coins')" id="coin-cost">Cost: 100</button>
+
+            <div class="potion-section card">
+                <h3>Alchemy Shop</h3>
+                <div class="upgrade-item">
+                    <span>🧪 Luck Potion (30s)</span>
+                    <small>+2.0 Luck Boost</small>
+                    <button onclick="buyPotion()" id="potion-cost" class="buy-btn potion">Buy: 500</button>
+                </div>
+                <div id="potion-timer">Potion Active: 0s</div>
             </div>
         </div>
     </div>
 
-    <div class="version-tag">v0.0.1 Patch - Added Auto-Roll & Rarity Glows</div>
+    <div class="log-section card">
+        <div id="roll-log"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
