@@ -2,11 +2,16 @@
 let coins = 0;
 let baseLuck = 1.0;
 let potionLuck = 0;
-let coinMultiplier = 1;
+let skinLuckBonus = 0;
+
+let baseCoinMultiplier = 1;
+let skinCoinMultiplier = 1;
+
 let luckCost = 50;
 let coinCost = 100;
 let potionCost = 500;
 
+let totalRollsCount = 0;
 let pityCounter = 0;
 const PITY_MAX = 100;
 
@@ -15,6 +20,8 @@ let potionSeconds = 0;
 
 let highestChance = 0;
 let recentRolls = [];
+let unlockedSkins = [];
+let claimedAchievements = [];
 
 const rarities = [
     { name: "Common", chance: 1, color: "#ffffff", payout: 1 },
@@ -27,33 +34,50 @@ const rarities = [
     { name: "Elemental", chance: 250000, color: "#ff4d00", payout: 200000 },
     { name: "Corrupted", chance: 1000000, color: "#2f3542", payout: 800000 },
     { name: "Divine", chance: 10000000, color: "#74b9ff", payout: 5000000 },
-    { name: "Infinity", chance: 100000000, color: "#a29bfe", payout: 50000000 }
+    { name: "Infinity", chance: 100000000, color: "#a29bfe", payout: 50000000 },
+    { name: "Multiverse", chance: 750000000, color: "#fd79a8", payout: 400000000 },
+    { name: "Absolute Zero", chance: 5000000000, color: "#00d2d3", payout: 3000000000 }
 ];
 
-function getLuck() {
-    return baseLuck + potionLuck;
+function getTotalLuck() {
+    return (baseLuck + potionLuck + skinLuckBonus);
+}
+
+function getTotalCoinMultiplier() {
+    return baseCoinMultiplier * skinCoinMultiplier;
 }
 
 function updateUI() {
     document.getElementById('coins').innerText = Math.floor(coins).toLocaleString();
-    document.getElementById('luck-stat').innerText = getLuck().toFixed(1);
+    document.getElementById('luck-stat').innerText = getTotalLuck().toFixed(1);
+    document.getElementById('stat-rolls').innerText = totalRollsCount.toLocaleString();
     
     document.getElementById('luck-cost').innerText = `Buy: ${luckCost}`;
     document.getElementById('coin-cost').innerText = `Buy: ${coinCost}`;
     document.getElementById('potion-cost').innerText = `Buy: ${potionCost}`;
     
+    // Purchase constraints
     document.getElementById('luck-cost').disabled = coins < luckCost;
     document.getElementById('coin-cost').disabled = coins < coinCost;
     document.getElementById('potion-cost').disabled = coins < potionCost;
 
-    // Update Pity Bar
+    // Forge button handlers
+    updateForgeButton(1, 25000);
+    updateForgeButton(2, 500000);
+
+    // Milestone button handlers
+    updateMilestoneButton(1, 100);
+    updateMilestoneButton(2, 1000);
+
+    // Pity Meter Fill Calculation
     const fill = (pityCounter / PITY_MAX) * 100;
     document.getElementById('pity-fill').style.width = `${fill}%`;
     document.getElementById('pity-indicator').style.display = pityCounter >= PITY_MAX ? 'block' : 'none';
 }
 
 function roll() {
-    let currentLuck = getLuck();
+    let currentLuck = getTotalLuck();
+    totalRollsCount++;
     
     // Apply Pity
     if (pityCounter >= PITY_MAX) {
@@ -73,7 +97,7 @@ function roll() {
         }
     }
 
-    coins += result.payout * coinMultiplier;
+    coins += result.payout * getTotalCoinMultiplier();
 
     // Track Best
     if (result.chance > highestChance) {
@@ -83,7 +107,7 @@ function roll() {
         best.style.color = result.color;
     }
 
-    // Update Display
+    // Update Display Box
     const nameTxt = document.getElementById('rarity-name');
     nameTxt.innerText = result.name;
     nameTxt.style.color = result.color;
@@ -109,6 +133,28 @@ function updateRecentRolls(res) {
     });
 }
 
+// Sidebar Mechanics
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    event.currentTarget.classList.add('active');
+    document.getElementById(`${tabId}-tab`).classList.add('active');
+}
+
+function buyUpgrade(type) {
+    if (type === 'luck' && coins >= luckCost) {
+        coins -= luckCost;
+        baseLuck += 0.2;
+        luckCost = Math.floor(luckCost * 1.7);
+    } else if (type === 'coins' && coins >= coinCost) {
+        coins -= coinCost;
+        baseCoinMultiplier += 1;
+        coinCost = Math.floor(coinCost * 2.2);
+    }
+    updateUI();
+}
+
 function buyPotion() {
     if (coins >= potionCost) {
         coins -= potionCost;
@@ -120,7 +166,52 @@ function buyPotion() {
     }
 }
 
-// Potion Timer Loop
+// Forge Skin Functions
+function buySkin(id, cost, luckBonus, coinMult) {
+    if (coins >= cost && !unlockedSkins.includes(id)) {
+        coins -= cost;
+        unlockedSkins.push(id);
+        skinLuckBonus += luckBonus;
+        skinCoinMultiplier = Math.max(skinCoinMultiplier, coinMult);
+        
+        // Visual adjustment to dice box element based on unlocked skin
+        if(id === 1) document.getElementById('dice').style.background = '#e67e22';
+        if(id === 2) document.getElementById('dice').style.background = '#9b59b6';
+        
+        updateUI();
+    }
+}
+
+function updateForgeButton(id, cost) {
+    const btn = document.getElementById(`skin-btn-${id}`);
+    if (unlockedSkins.includes(id)) {
+        btn.innerText = "Equipped & Active";
+        btn.disabled = true;
+    } else {
+        btn.disabled = coins < cost;
+    }
+}
+
+// Achievement Systems
+function claimReward(id, target, reward) {
+    if (totalRollsCount >= target && !claimedAchievements.includes(id)) {
+        coins += reward;
+        claimedAchievements.push(id);
+        updateUI();
+    }
+}
+
+function updateMilestoneButton(id, target) {
+    const btn = document.getElementById(`ach-btn-${id}`);
+    if (claimedAchievements.includes(id)) {
+        btn.innerText = "Claimed ✓";
+        btn.disabled = true;
+    } else {
+        btn.disabled = totalRollsCount < target;
+    }
+}
+
+// Timing loop for item consumables
 setInterval(() => {
     if (potionSeconds > 0) {
         potionSeconds--;
@@ -133,20 +224,6 @@ setInterval(() => {
     }
 }, 1000);
 
-function buyUpgrade(type) {
-    if (type === 'luck' && coins >= luckCost) {
-        coins -= luckCost;
-        baseLuck += 0.2;
-        luckCost = Math.floor(luckCost * 1.7);
-    } else if (type === 'coins' && coins >= coinCost) {
-        coins -= coinCost;
-        coinMultiplier += 1;
-        coinCost = Math.floor(coinCost * 2.2);
-    }
-    updateUI();
-}
-
-// Auto roll Logic
 let autoRollActive = false;
 let autoRollInterval;
 function toggleAutoRoll() {
@@ -155,7 +232,7 @@ function toggleAutoRoll() {
     if (autoRollActive) {
         btn.innerText = "Auto-Roll: ON";
         btn.style.background = "#e74c3c";
-        autoRollInterval = setInterval(roll, 250);
+        autoRollInterval = setInterval(roll, 200); // v0.0.3 Speeds up auto-roll slightly to 200ms
     } else {
         btn.innerText = "Auto-Roll: OFF";
         btn.style.background = "#34495e";

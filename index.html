@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Elements RNG - v0.0.2</title>
+    <title>Dice Elements RNG - v0.0.3</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
     <div class="header-container">
         <div class="stats-bar card">
             <div class="stat-item">💰 <span id="coins">0</span></div>
-            <div class="stat-item luck-text">🍀 Luck: <span id="luck-stat">1.0</span></div>
+            <div class="stat-item luck-text">🍀 Total Luck: x<span id="luck-stat">1.0</span></div>
         </div>
         <div class="best-roll-box card">
             <div class="label">🏆 BEST ROLL</div>
@@ -44,8 +44,14 @@
         </div>
 
         <div class="sidebar">
-            <div class="upgrade-section card">
-                <h3>Upgrades</h3>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('upgrades')">Upgrades</button>
+                <button class="tab-btn" onclick="switchTab('forge')">Forge</button>
+                <button class="tab-btn" onclick="switchTab('achievements')">Milestones</button>
+            </div>
+
+            <div id="upgrades-tab" class="tab-content active card">
+                <h3>Shop Upgrades</h3>
                 <div class="upgrade-item">
                     <span>🍀 Clover (Permanent)</span>
                     <button onclick="buyUpgrade('luck')" id="luck-cost" class="buy-btn">Cost: 50</button>
@@ -54,16 +60,39 @@
                     <span>💎 Greed (Permanent)</span>
                     <button onclick="buyUpgrade('coins')" id="coin-cost" class="buy-btn">Cost: 100</button>
                 </div>
-            </div>
-
-            <div class="potion-section card">
-                <h3>Alchemy Shop</h3>
+                <h3>Alchemy</h3>
                 <div class="upgrade-item">
                     <span>🧪 Luck Potion (30s)</span>
-                    <small>+2.0 Luck Boost</small>
+                    <small style="color: #aaa; font-size:0.75rem;">+2.0 Luck Boost</small>
                     <button onclick="buyPotion()" id="potion-cost" class="buy-btn potion">Buy: 500</button>
                 </div>
                 <div id="potion-timer">Potion Active: 0s</div>
+            </div>
+
+            <div id="forge-tab" class="tab-content card">
+                <h3>Aura Forge</h3>
+                <p style="font-size:0.75rem; color:#aaa; margin-top:-10px;">Unlock skins with permanent multipliers.</p>
+                <div class="forge-item" id="skin-1">
+                    <div>🔥 Magma Dice (+0.5 Luck)</div>
+                    <button onclick="buySkin(1, 25000, 0.5, 1)" id="skin-btn-1" class="buy-btn forge-btn">Forge: 25k</button>
+                </div>
+                <div class="forge-item" id="skin-2">
+                    <div>🌌 Nebula Cube (x2.0 Money)</div>
+                    <button onclick="buySkin(2, 500000, 0, 2)" id="skin-btn-2" class="buy-btn forge-btn">Forge: 500k</button>
+                </div>
+            </div>
+
+            <div id="achievements-tab" class="tab-content card">
+                <h3>Achievements</h3>
+                <div class="stats-mini">Total Rolls: <span id="stat-rolls">0</span></div>
+                <div class="achieve-item" id="ach-1">
+                    <span>100 Rolls Milestone</span>
+                    <button id="ach-btn-1" class="claim-btn" onclick="claimReward(1, 100, 1000)">Claim 1k 💰</button>
+                </div>
+                <div class="achieve-item" id="ach-2">
+                    <span>1,000 Rolls Milestone</span>
+                    <button id="ach-btn-2" class="claim-btn" onclick="claimReward(2, 1000, 15000)">Claim 15k 💰</button>
+                </div>
             </div>
         </div>
     </div>
