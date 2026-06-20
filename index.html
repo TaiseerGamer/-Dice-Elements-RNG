@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Elements RNG - v0.0.3</title>
+    <title>Dice Elements RNG - v0.0.4</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,11 +19,16 @@
         </div>
     </div>
 
+    <!-- Alert system for Save confirmations and Anomalies -->
+    <div id="game-alert">Progress Saved!</div>
+
     <div class="game-container">
+        <!-- Center Rolling Area -->
         <div class="roll-section card">
             <div id="dice-container">
                 <div id="dice">🎲</div>
                 <div id="pity-indicator">PITY READY!</div>
+                <div id="anomaly" onclick="popAnomaly()">💥 ANOMALY!</div>
             </div>
             
             <div class="pity-bar-container">
@@ -43,6 +48,7 @@
             <div class="recent-rolls" id="recent-feed"></div>
         </div>
 
+        <!-- Right Menu Sidebar -->
         <div class="sidebar">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('upgrades')">Upgrades</button>
@@ -50,6 +56,7 @@
                 <button class="tab-btn" onclick="switchTab('achievements')">Milestones</button>
             </div>
 
+            <!-- Upgrades Tab -->
             <div id="upgrades-tab" class="tab-content active card">
                 <h3>Shop Upgrades</h3>
                 <div class="upgrade-item">
@@ -67,8 +74,18 @@
                     <button onclick="buyPotion()" id="potion-cost" class="buy-btn potion">Buy: 500</button>
                 </div>
                 <div id="potion-timer">Potion Active: 0s</div>
+                
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 15px 0;">
+                
+                <!-- v0.0.4 Storage Management panel -->
+                <h3>Cloud Sync Panel</h3>
+                <div class="storage-buttons">
+                    <button class="btn-save" onclick="saveGame(true)">Manual Save</button>
+                    <button class="btn-wipe" onclick="wipeSave()">Wipe Save Data</button>
+                </div>
             </div>
 
+            <!-- Forge Tab -->
             <div id="forge-tab" class="tab-content card">
                 <h3>Aura Forge</h3>
                 <p style="font-size:0.75rem; color:#aaa; margin-top:-10px;">Unlock skins with permanent multipliers.</p>
@@ -82,6 +99,7 @@
                 </div>
             </div>
 
+            <!-- Achievements Tab -->
             <div id="achievements-tab" class="tab-content card">
                 <h3>Achievements</h3>
                 <div class="stats-mini">Total Rolls: <span id="stat-rolls">0</span></div>
@@ -92,6 +110,10 @@
                 <div class="achieve-item" id="ach-2">
                     <span>1,000 Rolls Milestone</span>
                     <button id="ach-btn-2" class="claim-btn" onclick="claimReward(2, 1000, 15000)">Claim 15k 💰</button>
+                </div>
+                <div class="achieve-item" id="ach-3">
+                    <span>10,000 Rolls Milestone</span>
+                    <button id="ach-btn-3" class="claim-btn" onclick="claimReward(3, 10000, 250000)">Claim 250k 💰</button>
                 </div>
             </div>
         </div>

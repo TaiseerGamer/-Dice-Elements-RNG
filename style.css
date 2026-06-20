@@ -5,6 +5,7 @@
     --gold: #f1c40f;
     --pity: #00d2d3;
     --tab-inactive: #1c1c28;
+    --danger: #e74c3c;
 }
 
 body {
@@ -37,6 +38,22 @@ body {
 
 #coins { color: var(--gold); font-weight: 800; font-size: 1.6rem; }
 
+/* Alert Box Styles */
+#game-alert {
+    position: fixed;
+    top: 20px;
+    background: #2ecc71;
+    color: #000;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}
+
 .game-container {
     display: flex;
     gap: 20px;
@@ -52,7 +69,7 @@ body {
     align-items: center;
 }
 
-/* DICE & PITY */
+/* DICE & ANOMALY SYSTEM */
 #dice-container { position: relative; margin-bottom: 20px; }
 
 #dice {
@@ -85,6 +102,23 @@ body {
     font-size: 0.7rem;
     display: none;
     animation: pulse 1s infinite;
+}
+
+#anomaly {
+    position: absolute;
+    top: 40px;
+    left: -120px;
+    background: var(--danger);
+    color: #fff;
+    font-weight: 800;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--danger);
+    display: none;
+    animation: pulse 0.5s infinite;
+    user-select: none;
 }
 
 /* PROGRESS BARS */
@@ -132,14 +166,9 @@ body {
     border: 1px solid rgba(255,255,255,0.08);
 }
 
-/* SIDEBAR TABS */
+/* SIDEBAR TABS & BUTTONS */
 .sidebar { flex: 1; display: flex; flex-direction: column; }
-
-.tabs {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
-}
+.tabs { display: flex; gap: 5px; margin-bottom: 10px; }
 
 .tab-btn {
     flex: 1;
@@ -161,7 +190,7 @@ body {
 .tab-content {
     display: none;
     padding: 20px;
-    height: 330px;
+    height: 380px;
     overflow-y: auto;
 }
 
@@ -192,6 +221,12 @@ body {
 .forge-btn { background: #e67e22; }
 .claim-btn { background: #3498db; color: white; }
 
+/* Cloud Sync UI Layout */
+.storage-buttons { display: flex; gap: 10px; margin-top: 10px; }
+.storage-buttons button { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-save { background: #34495e; color: #fff; }
+.btn-wipe { background: var(--danger); color: #fff; }
+
 .claim-btn:disabled { background: #2c3e50 !important; color: #7f8c8d !important; }
 
 #potion-timer {
@@ -202,12 +237,7 @@ body {
     display: none;
 }
 
-.stats-mini {
-    font-size: 0.85rem;
-    color: var(--pity);
-    margin-bottom: 15px;
-    font-weight: bold;
-}
+.stats-mini { font-size: 0.85rem; color: var(--pity); margin-bottom: 15px; font-weight: bold; }
 
 .log-section {
     width: 100%;
@@ -221,7 +251,7 @@ body {
 button:disabled { background: #1a252f; opacity: 0.4; cursor: not-allowed; }
 
 @keyframes pulse {
-    0% { transform: translateX(-50%) scale(1); }
-    50% { transform: translateX(-50%) scale(1.06); }
-    100% { transform: translateX(-50%) scale(1); }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
 }

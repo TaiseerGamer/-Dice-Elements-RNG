@@ -1,4 +1,4 @@
-// Game State
+// Game State Values
 let coins = 0;
 let baseLuck = 1.0;
 let potionLuck = 0;
@@ -19,9 +19,14 @@ let potionActive = false;
 let potionSeconds = 0;
 
 let highestChance = 0;
+let highestName = "None Yet";
+let highestColor = "#aaa";
 let recentRolls = [];
 let unlockedSkins = [];
 let claimedAchievements = [];
+
+let anomalyActive = false;
+let anomalyReward = 0;
 
 const rarities = [
     { name: "Common", chance: 1, color: "#ffffff", payout: 1 },
@@ -36,15 +41,22 @@ const rarities = [
     { name: "Divine", chance: 10000000, color: "#74b9ff", payout: 5000000 },
     { name: "Infinity", chance: 100000000, color: "#a29bfe", payout: 50000000 },
     { name: "Multiverse", chance: 750000000, color: "#fd79a8", payout: 400000000 },
-    { name: "Absolute Zero", chance: 5000000000, color: "#00d2d3", payout: 3000000000 }
+    { name: "Absolute Zero", chance: 5000000000, color: "#00d2d3", payout: 3000000000 },
+    // v0.0.4 Endgame Expansions
+    { name: "Singularity", chance: 40000000000, color: "#e84393", payout: 25000000000 },
+    { name: "The Matrix", chance: 300000000000, color: "#2ed573", payout: 180000000000 }
 ];
 
-function getTotalLuck() {
-    return (baseLuck + potionLuck + skinLuckBonus);
-}
+function getTotalLuck() { return (baseLuck + potionLuck + skinLuckBonus); }
+function getTotalCoinMultiplier() { return baseCoinMultiplier * skinCoinMultiplier; }
 
-function getTotalCoinMultiplier() {
-    return baseCoinMultiplier * skinCoinMultiplier;
+// Alert notice mechanic
+function showAlert(message, color = "#2ecc71") {
+    const alertBox = document.getElementById('game-alert');
+    alertBox.innerText = message;
+    alertBox.style.backgroundColor = color;
+    alertBox.style.opacity = "1";
+    setTimeout(() => { alertBox.style.opacity = "0"; }, 2000);
 }
 
 function updateUI() {
@@ -56,20 +68,21 @@ function updateUI() {
     document.getElementById('coin-cost').innerText = `Buy: ${coinCost}`;
     document.getElementById('potion-cost').innerText = `Buy: ${potionCost}`;
     
-    // Purchase constraints
     document.getElementById('luck-cost').disabled = coins < luckCost;
     document.getElementById('coin-cost').disabled = coins < coinCost;
     document.getElementById('potion-cost').disabled = coins < potionCost;
 
-    // Forge button handlers
+    // Refresh display structures
+    const best = document.getElementById('best-roll-display');
+    best.innerText = highestName === "None Yet" ? "None Yet" : `${highestName} (1/${highestChance.toLocaleString()})`;
+    best.style.color = highestColor;
+
     updateForgeButton(1, 25000);
     updateForgeButton(2, 500000);
-
-    // Milestone button handlers
     updateMilestoneButton(1, 100);
     updateMilestoneButton(2, 1000);
+    updateMilestoneButton(3, 10000);
 
-    // Pity Meter Fill Calculation
     const fill = (pityCounter / PITY_MAX) * 100;
     document.getElementById('pity-fill').style.width = `${fill}%`;
     document.getElementById('pity-indicator').style.display = pityCounter >= PITY_MAX ? 'block' : 'none';
@@ -79,13 +92,10 @@ function roll() {
     let currentLuck = getTotalLuck();
     totalRollsCount++;
     
-    // Apply Pity
     if (pityCounter >= PITY_MAX) {
         currentLuck *= 10;
         pityCounter = 0;
-    } else {
-        pityCounter++;
-    }
+    } else { pityCounter++; }
 
     const rollVal = Math.random() / currentLuck;
     let result = rarities[0];
@@ -97,21 +107,23 @@ function roll() {
         }
     }
 
-    coins += result.payout * getTotalCoinMultiplier();
+    const reward = result.payout * getTotalCoinMultiplier();
+    coins += reward;
 
-    // Track Best
     if (result.chance > highestChance) {
         highestChance = result.chance;
-        const best = document.getElementById('best-roll-display');
-        best.innerText = result.name;
-        best.style.color = result.color;
+        highestName = result.name;
+        highestColor = result.color;
     }
 
-    // Update Display Box
-    const nameTxt = document.getElementById('rarity-name');
-    nameTxt.innerText = result.name;
-    nameTxt.style.color = result.color;
+    document.getElementById('rarity-name').innerText = result.name;
+    document.getElementById('rarity-name').style.color = result.color;
     document.getElementById('rarity-chance').innerText = `1 in ${result.chance.toLocaleString()}`;
+
+    // Random Anomaly Triggering (0.5% chance per active roll)
+    if (Math.random() < 0.005 && !anomalyActive) {
+        triggerAnomaly(reward * 50);
+    }
 
     updateRecentRolls(result);
     updateUI();
@@ -120,7 +132,6 @@ function roll() {
 function updateRecentRolls(res) {
     recentRolls.unshift(res);
     if (recentRolls.length > 5) recentRolls.pop();
-    
     const feed = document.getElementById('recent-feed');
     feed.innerHTML = '';
     recentRolls.forEach(r => {
@@ -133,11 +144,26 @@ function updateRecentRolls(res) {
     });
 }
 
-// Sidebar Mechanics
+/* ANOMALY ACTIONS */
+function triggerAnomaly(payoutSize) {
+    anomalyActive = true;
+    anomalyReward = Math.max(500, Math.floor(payoutSize));
+    document.getElementById('anomaly').style.display = 'block';
+}
+
+function popAnomaly() {
+    if (anomalyActive) {
+        coins += anomalyReward;
+        showAlert(`+${anomalyReward.toLocaleString()} ANOMALY CASH!`, "#ff4757");
+        document.getElementById('anomaly').style.display = 'none';
+        anomalyActive = false;
+        updateUI();
+    }
+}
+
 function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
     event.currentTarget.classList.add('active');
     document.getElementById(`${tabId}-tab`).classList.add('active');
 }
@@ -166,18 +192,14 @@ function buyPotion() {
     }
 }
 
-// Forge Skin Functions
 function buySkin(id, cost, luckBonus, coinMult) {
     if (coins >= cost && !unlockedSkins.includes(id)) {
         coins -= cost;
         unlockedSkins.push(id);
         skinLuckBonus += luckBonus;
         skinCoinMultiplier = Math.max(skinCoinMultiplier, coinMult);
-        
-        // Visual adjustment to dice box element based on unlocked skin
         if(id === 1) document.getElementById('dice').style.background = '#e67e22';
         if(id === 2) document.getElementById('dice').style.background = '#9b59b6';
-        
         updateUI();
     }
 }
@@ -185,14 +207,11 @@ function buySkin(id, cost, luckBonus, coinMult) {
 function updateForgeButton(id, cost) {
     const btn = document.getElementById(`skin-btn-${id}`);
     if (unlockedSkins.includes(id)) {
-        btn.innerText = "Equipped & Active";
+        btn.innerText = "Equipped";
         btn.disabled = true;
-    } else {
-        btn.disabled = coins < cost;
-    }
+    } else { btn.disabled = coins < cost; }
 }
 
-// Achievement Systems
 function claimReward(id, target, reward) {
     if (totalRollsCount >= target && !claimedAchievements.includes(id)) {
         coins += reward;
@@ -206,12 +225,55 @@ function updateMilestoneButton(id, target) {
     if (claimedAchievements.includes(id)) {
         btn.innerText = "Claimed ✓";
         btn.disabled = true;
-    } else {
-        btn.disabled = totalRollsCount < target;
+    } else { btn.disabled = totalRollsCount < target; }
+}
+
+/* DATA ARCHIVE STATIONS (LOCALSTORAGE) */
+function saveGame(manual = false) {
+    const saveState = {
+        coins, baseLuck, baseCoinMultiplier, luckCost, coinCost,
+        totalRollsCount, pityCounter, highestChance, highestName, highestColor,
+        unlockedSkins, claimedAchievements, skinLuckBonus, skinCoinMultiplier
+    };
+    localStorage.setItem('diceRNG_savefile', JSON.stringify(saveState));
+    if (manual) showAlert("Progress Saved Safely!");
+}
+
+function loadGame() {
+    const data = localStorage.getItem('diceRNG_savefile');
+    if (!data) return;
+    const save = JSON.parse(data);
+    
+    coins = save.coins ?? 0;
+    baseLuck = save.baseLuck ?? 1.0;
+    baseCoinMultiplier = save.baseCoinMultiplier ?? 1;
+    luckCost = save.luckCost ?? 50;
+    coinCost = save.coinCost ?? 100;
+    totalRollsCount = save.totalRollsCount ?? 0;
+    pityCounter = save.pityCounter ?? 0;
+    highestChance = save.highestChance ?? 0;
+    highestName = save.highestName ?? "None Yet";
+    highestColor = save.highestColor ?? "#aaa";
+    unlockedSkins = save.unlockedSkins ?? [];
+    claimedAchievements = save.claimedAchievements ?? [];
+    skinLuckBonus = save.skinLuckBonus ?? 0;
+    skinCoinMultiplier = save.skinCoinMultiplier ?? 1;
+
+    // Reinject skin colors to dice component on boot load
+    if(unlockedSkins.includes(2)) document.getElementById('dice').style.background = '#9b59b6';
+    else if(unlockedSkins.includes(1)) document.getElementById('dice').style.background = '#e67e22';
+
+    updateUI();
+}
+
+function wipeSave() {
+    if (confirm("Are you absolutely sure you want to reset everything? Your progress will be lost forever!")) {
+        localStorage.removeItem('diceRNG_savefile');
+        window.location.reload();
     }
 }
 
-// Timing loop for item consumables
+// Running Engine Loops
 setInterval(() => {
     if (potionSeconds > 0) {
         potionSeconds--;
@@ -224,6 +286,9 @@ setInterval(() => {
     }
 }, 1000);
 
+// Auto save process loop triggers every 5 seconds
+setInterval(() => { saveGame(false); }, 5000);
+
 let autoRollActive = false;
 let autoRollInterval;
 function toggleAutoRoll() {
@@ -232,7 +297,7 @@ function toggleAutoRoll() {
     if (autoRollActive) {
         btn.innerText = "Auto-Roll: ON";
         btn.style.background = "#e74c3c";
-        autoRollInterval = setInterval(roll, 200); // v0.0.3 Speeds up auto-roll slightly to 200ms
+        autoRollInterval = setInterval(roll, 200);
     } else {
         btn.innerText = "Auto-Roll: OFF";
         btn.style.background = "#34495e";
@@ -241,4 +306,7 @@ function toggleAutoRoll() {
 }
 
 document.getElementById('dice').addEventListener('click', roll);
-updateUI();
+window.onload = function() {
+    loadGame();
+    updateUI();
+};
